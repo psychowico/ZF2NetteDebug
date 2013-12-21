@@ -27,6 +27,16 @@ class Module
      */
     public function onBootstrap(MvcEvent $e)
     {
+        $headers = $e->getRequest()->getHeaders();
+        if ($headers->has('accept')) {
+            $accept  = $headers->get('accept');
+
+            $match = $accept->match('application/json, application/javascript');
+            if( $match->getTypeString() === 'application/json' ) {
+                return false;
+            }
+        }
+
         $app    = $e->getApplication();
         $config = $app->getConfig();
 
@@ -35,13 +45,13 @@ class Module
         ) return;
 
         require __DIR__ . '/src/Nette/Diagnostics/exceptions.php';
-        
+
         array_key_exists('bar', $config['nette_debug']) or
             $config['nette_debug']['bar'] = true;
 
         array_key_exists('mode', $config['nette_debug']) or
             $config['nette_debug']['mode'] = null;
-        
+
         array_key_exists('log', $config['nette_debug']) or
             $config['nette_debug']['log'] = null;
 
@@ -49,9 +59,9 @@ class Module
             $config['nette_debug']['email'] = null;
 
         Debugger::_init();
-        
+
         $config['nette_debug']['bar'] or Debugger::$bar = null;
-        
+
         Debugger::enable(
             $config['nette_debug']['mode'],
             $config['nette_debug']['log'],
